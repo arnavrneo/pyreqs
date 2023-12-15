@@ -61,7 +61,7 @@ func getPaths(dirs string) ([]string, map[os.DirEntry]struct{}) {
 
 // return all the imported libraries
 func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]struct{} {
-	var importSet []string
+	importSet := map[string]struct{}{}    // set
 	importStruct := map[string]struct{}{} // for implementing a set
 
 	// gives a subset of the whole file
@@ -69,14 +69,17 @@ func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]
 	for _, v := range pyFiles {
 		data, err := os.ReadFile(v)
 		check(err)
-
+		deleteThis := strings.Split(string(data), "\n") // now done a split at \n followed by regex search
 		r, _ := regexp.Compile(importRegEx)
-		importSet = append(importSet, r.FindString(string(data)))
+		for _, value := range deleteThis {
+			importSet[r.FindString(value)] = struct{}{} // maintained a set for imports
+		}
+		fmt.Println("==IMPORT==", importSet)
 	}
 
 	// search in that subset
 	// TODO: a better way of getting imports; no \n or special characters
-	for _, i := range importSet {
+	for i := range importSet {
 		arr := strings.Split(i, " ")
 		for i, j := range arr {
 			if strings.Contains(j, "import") {
@@ -111,7 +114,7 @@ func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]
 	predefinedLib, err := os.ReadFile("cmd/stdlib")
 	check(err)
 	inbuiltImports := strings.Split(string(predefinedLib), " ")
-	for j, _ := range importStruct {
+	for j := range importStruct {
 		for _, k := range inbuiltImports {
 			if j == k {
 				delete(importStruct, k)
@@ -145,7 +148,6 @@ func getLocalPackages(venvDir string) []string {
 
 // fetch and return info from pypi package server
 func fetchPyPIServer(imp []string) map[string]string {
-
 	type Content struct {
 		Name    string `json:"name"`
 		Version string `json:"version"`
@@ -232,7 +234,7 @@ func writeRequirements(venvDir string, codesDir string) {
 	var pypiStore []string
 	for i := range importStruct {
 		cntr := 0
-		for j, _ := range localSet {
+		for j := range localSet {
 			if i == j {
 				cntr += 1
 			}
