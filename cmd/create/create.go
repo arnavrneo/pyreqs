@@ -1,9 +1,10 @@
 /*
-Copyright © 2023 ARNAV RAINA <r.arnav@icloud.com>
+Copyright © 2023 ARNAV <r.arnav@icloud.com>
 */
 package create
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
@@ -22,12 +23,19 @@ var (
 	venvPath string
 )
 
-// TODO: improve regex
 var importRegEx string = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
 // var fromRegEx string = `^(?m)[\s\S]*from\s+(\w+(\.\w+)*)\s+import\s+(\*\s+as\s+\w+|\w+(\s+as\s+\w+)?)\s*$`
 var myClient = &http.Client{Timeout: 1000 * time.Second}
 
-// error check
+// bundling files
+//
+//go:embed stdlib
+var stdlib embed.FS
+
+//go:embed mappings.txt
+var mappings embed.FS
+
+// MAIN
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -35,10 +43,10 @@ func check(e error) {
 }
 
 // return the path of .py files in the dir
-func getPaths(dirs string) ([]string, map[os.DirEntry]struct{}) {
+func getPaths(dirs string) ([]string, []string) {
 	var pyFiles []string
 	fileList := []string{}
-	dirList := map[os.DirEntry]struct{}{}
+	dirList := []string{}
 
 	// ignoreDirs := []string {".hg", ".svn", ".git", ".tox", "__pycache__", "env", "venv"}
 	err := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
@@ -49,18 +57,19 @@ func getPaths(dirs string) ([]string, map[os.DirEntry]struct{}) {
 		return nil
 	})
 	check(err)
-
 	for _, file := range fileList {
 		if strings.Contains(file, ".py") {
 			pyFiles = append(pyFiles, file)
+		} else {
+			dirList = append(dirList, file)
 		}
 	}
-
 	return pyFiles, dirList
 }
 
 // return all the imported libraries
-func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]struct{} {
+func readImports(pyFiles []string, dirList []string) map[string]struct{} {
+
 	importSet := map[string]struct{}{}    // set
 	importStruct := map[string]struct{}{} // for implementing a set
 
@@ -74,13 +83,13 @@ func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]
 		for _, value := range deleteThis {
 			importSet[r.FindString(value)] = struct{}{} // maintained a set for imports
 		}
-		fmt.Println("==IMPORT==", importSet)
+		//fmt.Println("==IMPORT==", importSet)
 	}
 
 	// search in that subset
-	// TODO: a better way of getting imports; no \n or special characters
 	for i := range importSet {
 		arr := strings.Split(i, " ")
+		fmt.Println(arr)
 		for i, j := range arr {
 			if strings.Contains(j, "import") {
 				if i-2 >= 0 && strings.Contains(arr[i-2], "from") {
@@ -103,15 +112,15 @@ func readImports(pyFiles []string, dirList map[os.DirEntry]struct{}) map[string]
 
 	// ignore all the directory imports
 	for k := range importStruct {
-		for l := range dirList {
-			if k == l.Name() {
+		for _, l := range dirList {
+			if strings.Contains(l, k) {
 				delete(importStruct, k)
 			}
 		}
 	}
 
 	// python inbuilt imports
-	predefinedLib, err := os.ReadFile("cmd/stdlib")
+	predefinedLib, err := stdlib.ReadFile("stdlib")
 	check(err)
 	inbuiltImports := strings.Split(string(predefinedLib), " ")
 	for j := range importStruct {
@@ -159,7 +168,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 
 	var info Infos
 	pypiSet := make(map[string]string)
-	mappings, err := os.ReadFile("cmd/mappings.txt")
+	mappings, err := mappings.ReadFile("mappings.txt")
 	check(err)
 	mappingsImports := strings.Split(string(mappings), "\n")
 	//mappingSet := map[string]struct{ string }{}
