@@ -24,7 +24,6 @@ var (
 )
 
 var importRegEx string = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
-// var fromRegEx string = `^(?m)[\s\S]*from\s+(\w+(\.\w+)*)\s+import\s+(\*\s+as\s+\w+|\w+(\s+as\s+\w+)?)\s*$`
 var myClient = &http.Client{Timeout: 1000 * time.Second}
 
 // bundling files
@@ -42,15 +41,15 @@ func check(e error) {
 	}
 }
 
-// return the path of .py files in the dir
+// return the path of python files in the dir
 func getPaths(dirs string) ([]string, []string) {
 	var pyFiles []string
 	fileList := []string{}
 	dirList := []string{}
 
-	// ignoreDirs := []string {".hg", ".svn", ".git", ".tox", "__pycache__", "env", "venv"}
+	// ignoreDirs := []string {".hg", ".svn"}
 	err := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
-		if f.IsDir() && (f.Name() == "venv" || f.Name() == "env" || f.Name() == "__pycache__") {
+		if f.IsDir() && (f.Name() == "venv" || f.Name() == "env" || f.Name() == "__pycache__" || f.Name() == ".git" || f.Name() == ".tox") {
 			return filepath.SkipDir
 		}
 		fileList = append(fileList, path)
@@ -70,11 +69,9 @@ func getPaths(dirs string) ([]string, []string) {
 // return all the imported libraries
 func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 
-	importSet := map[string]struct{}{}    // set
-	importStruct := map[string]struct{}{} // for implementing a set
+	importSet := map[string]struct{}{} // set
+	importStruct := map[string]struct{}{}
 
-	// gives a subset of the whole file
-	// code till the line which has the last import
 	for _, v := range pyFiles {
 		data, err := os.ReadFile(v)
 		check(err)
@@ -89,7 +86,6 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 	// search in that subset
 	for i := range importSet {
 		arr := strings.Split(i, " ")
-		fmt.Println(arr)
 		for i, j := range arr {
 			if strings.Contains(j, "import") {
 				if i-2 >= 0 && strings.Contains(arr[i-2], "from") {
@@ -177,9 +173,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 	for _, value := range mappingsImports {
 		mappingImportsMap[strings.Split(value, ":")[0]] = true
 	}
-
 	for _, j := range imp {
-		// TODO: try to look for string formatting ways instead of "+"
 		// TODO: do http error handling
 		var name string
 		// check for python libraries mapping
@@ -193,6 +187,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 			name = j
 		}
 		resp, err := myClient.Get("https://pypi.org/pypi/" + name + "/json")
+		fmt.Println()
 		check(err)
 		defer resp.Body.Close()
 
@@ -267,7 +262,6 @@ func writeRequirements(venvDir string, codesDir string) {
 			}
 		}
 	}
-
 	fmt.Println("Created successfully!")
 }
 
