@@ -27,7 +27,7 @@ var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is mult
 var myClient = &http.Client{Timeout: 1000 * time.Second}
 
 // bundling files
-//
+
 //go:embed stdlib
 var stdlib embed.FS
 
@@ -47,9 +47,10 @@ func getPaths(dirs string) ([]string, []string) {
 	var fileList []string
 	var dirList []string
 
-	// ignoreDirs := []string {".hg", ".svn"}
 	err := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
-		if f.IsDir() && (f.Name() == "venv" || f.Name() == "env" || f.Name() == "__pycache__" || f.Name() == ".git" || f.Name() == ".tox") {
+		if f.IsDir() && (f.Name() == "venv" || f.Name() == "env" ||
+			f.Name() == "__pycache__" || f.Name() == ".git" ||
+			f.Name() == ".tox" || f.Name() == ".svn" || f.Name() == ".hg") {
 			return filepath.SkipDir
 		}
 		fileList = append(fileList, path)
