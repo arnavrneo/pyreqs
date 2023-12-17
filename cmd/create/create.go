@@ -23,7 +23,7 @@ var (
 	venvPath string
 )
 
-var importRegEx string = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
+var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
 var myClient = &http.Client{Timeout: 1000 * time.Second}
 
 // bundling files
@@ -44,8 +44,8 @@ func check(e error) {
 // return the path of python files in the dir
 func getPaths(dirs string) ([]string, []string) {
 	var pyFiles []string
-	fileList := []string{}
-	dirList := []string{}
+	var fileList []string
+	var dirList []string
 
 	// ignoreDirs := []string {".hg", ".svn"}
 	err := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
@@ -159,7 +159,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 	}
 
 	type Infos struct {
-		Info Content `json:"info"` // dont do this: []Content; response isnt a list
+		Info Content `json:"info"` // dont do this: []Content; response isn't a list
 	}
 
 	var info Infos
