@@ -1,6 +1,8 @@
-torch==2.1.1
+torch==2.1.2
 PyYAML==6.0.1
 tensorflow==2.15.0.post1
-transformers==4.36.0
 pandas==2.1.4
+Pack==0.0.1
+transformers==4.36.1
 ipython==8.18.1
+urllib3==2.1.0
