@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	dirPath  string
-	venvPath string
+	dirPath    string
+	venvPath   string
+	ignoreDirs string
 )
 
 var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
@@ -42,21 +43,47 @@ func check(e error) {
 }
 
 // return the path of python files in the dir
-func getPaths(dirs string) ([]string, []string) {
+func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	var pyFiles []string
 	var fileList []string
 	var dirList []string
+	var ignoreDirList []os.DirEntry
 
-	err := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
-		if f.IsDir() && (f.Name() == "venv" || f.Name() == "env" ||
-			f.Name() == "__pycache__" || f.Name() == ".git" ||
-			f.Name() == ".tox" || f.Name() == ".svn" || f.Name() == ".hg") {
-			return filepath.SkipDir
+	// directory ignores
+	if ignoreDirs != " " {
+		ignoreDirsArray := strings.Split(ignoreDirs, ",")
+		for _, j := range ignoreDirsArray {
+			walk := filepath.WalkDir(j, func(path string, f os.DirEntry, err error) error {
+				if f.IsDir() {
+					ignoreDirList = append(ignoreDirList, f)
+				}
+				return nil
+			})
+			check(walk)
+		}
+	}
+
+	walk := filepath.WalkDir(dirs, func(path string, f os.DirEntry, err error) error {
+		if f.IsDir() {
+			if f.Name() == "venv" || f.Name() == "env" ||
+				f.Name() == "__pycache__" || f.Name() == ".git" ||
+				f.Name() == ".tox" || f.Name() == ".svn" || f.Name() == ".hg" {
+				return filepath.SkipDir
+			}
+			if ignoreDirList != nil {
+				for _, l := range ignoreDirList {
+					if f.Name() == l.Name() {
+						fmt.Println("K: ", l)
+						return filepath.SkipDir
+					}
+				}
+			}
 		}
 		fileList = append(fileList, path)
 		return nil
 	})
-	check(err)
+	check(walk)
+
 	for _, file := range fileList {
 		if strings.Contains(file, ".py") {
 			pyFiles = append(pyFiles, file)
@@ -218,7 +245,7 @@ func writeRequirements(venvDir string, codesDir string) {
 		}
 	}()
 
-	pyFiles, dirList := getPaths(codesDir)
+	pyFiles, dirList := getPaths(codesDir, ignoreDirs)
 	imports := readImports(pyFiles, dirList)
 	distPackages := getLocalPackages(venvDir)
 
@@ -294,5 +321,5 @@ func init() {
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	CreateCmd.Flags().StringVarP(&dirPath, "dirPath", "d", "./", "directory to .py files")
 	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv")
-
+	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories; each seperated by comma")
 }

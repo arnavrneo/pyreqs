@@ -9,7 +9,7 @@ import (
 
 func Test_getPaths(t *testing.T) {
 	dirs := "testdata"
-	_, dirList := getPaths(dirs)
+	_, dirList := getPaths(dirs, "testdata/pyTestCodes")
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
