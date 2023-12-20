@@ -43,7 +43,7 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "testdata")
+	writeRequirements("", "testdata", "./", false)
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {

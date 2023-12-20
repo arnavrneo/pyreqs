@@ -23,6 +23,7 @@ var (
 	venvPath   string
 	ignoreDirs string
 	savePath   string
+	print      bool
 )
 
 var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
@@ -230,12 +231,16 @@ func fetchPyPIServer(imp []string) map[string]string {
 }
 
 // write to requirements.txt
-func writeRequirements(venvDir string, codesDir string, savePath string) {
+func writeRequirements(venvDir string, codesDir string, savePath string, print bool) {
 	// type store struct {
 	// 	name string
 	// 	ver string
 	// }
 
+	_, err := os.Stat(filepath.Join(savePath, "requirements.txt"))
+	if !os.IsNotExist(err) {
+		fmt.Printf("requirements.txt already exists. It will be overwritten.\n")
+	}
 	file, err := os.Create(filepath.Join(savePath, "requirements.txt"))
 	check(err)
 
@@ -286,8 +291,13 @@ func writeRequirements(venvDir string, codesDir string, savePath string) {
 		if _, err := file.Write([]byte(fullImport)); err != nil {
 			panic(err)
 		}
+		if print {
+			fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+		}
 	}
+
 	fmt.Println("Created successfully!")
+
 }
 
 // CreateCmd represents the create command
@@ -296,7 +306,7 @@ var CreateCmd = &cobra.Command{
 	Short: "creates a requirements.txt file",
 	Long:  `LONG DESC`,
 	Run: func(cmd *cobra.Command, args []string) {
-		writeRequirements(venvPath, dirPath, savePath)
+		writeRequirements(venvPath, dirPath, savePath, print)
 	},
 }
 
@@ -315,4 +325,5 @@ func init() {
 	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv")
 	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories; each seperated by comma")
 	CreateCmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
+	CreateCmd.Flags().BoolVarP(&print, "print", "p", false, "print requirements.txt to terminal")
 }
