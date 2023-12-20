@@ -1,5 +1,3 @@
- Can’t automatically mergepackage create
-
 import (
 	"bufio"
 	"os"
