@@ -287,12 +287,14 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	maps.Copy(importsInfo, pypiSet)
 
 	for i, j := range importsInfo {
-		fullImport := i + "==" + j + "\n"
-		if _, err := file.Write([]byte(fullImport)); err != nil {
-			panic(err)
-		}
-		if print {
-			fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+		if i != "" || j != "" {
+			fullImport := i + "==" + j + "\n"
+			if _, err := file.Write([]byte(fullImport)); err != nil {
+				panic(err)
+			}
+			if print {
+				fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+			}
 		}
 	}
 
