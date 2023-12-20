@@ -1,6 +1,7 @@
 package create
 
 import (
+	"fmt"
 	"bufio"
 	"os"
 	"strings"
@@ -55,6 +56,7 @@ func Test_writeRequirements(t *testing.T) {
 	var imports []string
 	scanner := bufio.NewScanner(reqRead)
 	for scanner.Scan() {
+		fmt.Println(scanner.Text())
 		imports = append(imports, scanner.Text())
 	}
 
