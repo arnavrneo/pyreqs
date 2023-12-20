@@ -22,6 +22,7 @@ var (
 	dirPath    string
 	venvPath   string
 	ignoreDirs string
+	savePath   string
 )
 
 var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
@@ -214,7 +215,6 @@ func fetchPyPIServer(imp []string) map[string]string {
 			name = j
 		}
 		resp, err := httpClient.Get("https://pypi.org/pypi/" + name + "/json")
-		fmt.Println()
 		check(err)
 		defer resp.Body.Close()
 
@@ -230,13 +230,13 @@ func fetchPyPIServer(imp []string) map[string]string {
 }
 
 // write to requirements.txt
-func writeRequirements(venvDir string, codesDir string) {
+func writeRequirements(venvDir string, codesDir string, savePath string) {
 	// type store struct {
 	// 	name string
 	// 	ver string
 	// }
 
-	file, err := os.Create("requirements.txt")
+	file, err := os.Create(filepath.Join(savePath, "requirements.txt"))
 	check(err)
 
 	defer func() { // delays the execution until the surrounding function completes
@@ -281,14 +281,6 @@ func writeRequirements(venvDir string, codesDir string) {
 	maps.Copy(importsInfo, localSet)
 	maps.Copy(importsInfo, pypiSet)
 
-	//for i, j := range importsInfo {
-	//	if i != "" && j != "" {
-	//		fullImport := i + "==" + j + "\n"
-	//		if _, err := file.Write([]byte(fullImport)); err != nil {
-	//			panic(err)
-	//		}
-	//	}
-	//}
 	for i, j := range importsInfo {
 		fullImport := i + "==" + j + "\n"
 		if _, err := file.Write([]byte(fullImport)); err != nil {
@@ -304,7 +296,7 @@ var CreateCmd = &cobra.Command{
 	Short: "creates a requirements.txt file",
 	Long:  `LONG DESC`,
 	Run: func(cmd *cobra.Command, args []string) {
-		writeRequirements(venvPath, dirPath)
+		writeRequirements(venvPath, dirPath, savePath)
 	},
 }
 
@@ -322,4 +314,5 @@ func init() {
 	CreateCmd.Flags().StringVarP(&dirPath, "dirPath", "d", "./", "directory to .py files")
 	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv")
 	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories; each seperated by comma")
+	CreateCmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
 }
