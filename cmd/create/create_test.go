@@ -1,4 +1,4 @@
-package create
+ Can’t automatically mergepackage create
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 
 func Test_getPaths(t *testing.T) {
 	dirs := "testdata"
-	_, dirList := getPaths(dirs, "testdata/pyTestCodes")
+	_, dirList := getPaths(dirs)
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
@@ -43,7 +43,7 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "testdata", "./")
+	writeRequirements("", "testdata")
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {
