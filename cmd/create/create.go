@@ -305,8 +305,8 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 // CreateCmd represents the create command
 var CreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "creates a requirements.txt file",
-	Long:  `LONG DESC`,
+	Short: "Generates a requirements.txt file",
+	Long:  `Generates a requirements.txt file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		writeRequirements(venvPath, dirPath, savePath, print)
 	},

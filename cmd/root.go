@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 ARNAV <r.arnav@icloud.com>
 */
 package cmd
 
@@ -13,8 +13,10 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pyreqs",
-	Short: "pyreqs: for creating python dependencies",
-	Long:  `Use this to create requirements.txt file`,
+	Short: "pyreqs: Create python dependency file easily",
+	Long: `pyreqs: A cli program designed to speed-up your python projects by auto-generating python dependencies (requirements.txt) file for you. 
+Call pyreqs with the available commands to see the magic in work!
+			`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
