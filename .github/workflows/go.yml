@@ -47,8 +47,8 @@ jobs:
           with:
             name: pyreqs-linux
             path: build
-        - run: zip -r build.zip build/
+        # - run: zip -r build.zip build/
         - uses: ncipollo/release-action@v1
           with:
             tag: v1.0.1
-            artifacts: "build.zip"
+            artifacts: build
