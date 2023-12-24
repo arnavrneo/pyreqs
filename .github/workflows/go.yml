@@ -26,3 +26,10 @@ jobs:
       
     - name: Test
       run: go test -v ./...
+
+    - name: Build
+      run: go build -v ./... -o pyreqs-linux
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: pyreqs-linux
