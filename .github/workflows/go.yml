@@ -32,4 +32,22 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
+        name: pyreqs-linux
         path: pyreqs-linux
+
+  release:
+      runs-on: ubuntu-latest
+      permissions:
+        contents: write
+        
+      needs: build
+
+      steps: 
+        - uses: actions/download-artifact@v3
+          with:
+            name: pyreqs-linux
+            path: build
+        - run: zip -r build.zip build/
+        - uses: ncipollo/release-action@v1
+          with:
+            artifacts: "build.zip"
