@@ -27,13 +27,29 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Build
-      run: env GOOS="linux" GOARCH="arm64" go build -o pyreqs-linux . 
+# Cross-platform builds
+    - name: Build-linux-arm64
+      run: env GOOS="linux" GOARCH="arm64" go build -o build/pyreqs-linux-arm64 .
+      
+    - name: Build-linux-amd64
+      run: env GOOS="linux" GOARCH="amd64" go build -o build/pyreqs-linux-amd64 . 
+      
+    - name: Build-darwin-arm64
+      run: env GOOS="darwin" GOARCH="arm64" go build -o build/pyreqs-macos-arm64 . 
+      
+    - name: Build-darwin-arm64
+      run: env GOOS="darwin" GOARCH="amd64" go build -o build/pyreqs-macos-amd64 . 
+      
+    - name: Build-windows-386
+      run: env GOOS="windows" GOARCH="386" go build -o build/pyreqs-windows-386.exe . 
+      
+    - name: Build-windows-amd64
+      run: env GOOS="windows" GOARCH="amd64" go build -o build/pyreqs-windows-amd64.exe . 
 
     - uses: actions/upload-artifact@v3
       with:
-        name: pyreqs-linux
-        path: pyreqs-linux
+        name: pyreqs
+        path: build/
 
   release:
       runs-on: ubuntu-latest
@@ -45,9 +61,8 @@ jobs:
       steps: 
         - uses: actions/download-artifact@v3
           with:
-            name: pyreqs-linux
+            name: pyreqs
             path: build
-        # - run: zip -r build.zip build/
         - uses: ncipollo/release-action@v1
           with:
             tag: v1.0.1
