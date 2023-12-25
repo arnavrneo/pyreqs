@@ -13,6 +13,7 @@ ComputedAttribute:ExtensionClass
 constraint:python-constraint
 Crypto:pycryptodome
 Cryptodome:pycryptodomex
+cv2:opencv-python
 FSM:pexpect
 FiftyOneDegrees:51degrees_mobile_detector_v3_wrapper
 functional:pyfunctional
