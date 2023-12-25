@@ -14,8 +14,8 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "pyreqs",
 	Short: "pyreqs: Create python dependency file easily",
-	Long: `pyreqs: A cli program designed to speed-up your python projects by auto-generating python dependencies (requirements.txt) file for you. 
-Call pyreqs with the available commands to see the magic in work!
+	Long: `Seamlessly generate python dependencies (requirements.txt) file. 
+Call pyreqs with the available commands to see the magic done!
 			`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -30,6 +30,7 @@ Call pyreqs with the available commands to see the magic in work!
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

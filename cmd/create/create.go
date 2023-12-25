@@ -306,7 +306,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Generates a requirements.txt file",
-	Long:  `Generates a requirements.txt file`,
+	Long:  `Generates a requirements.txt file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		writeRequirements(venvPath, dirPath, savePath, print)
 	},
@@ -324,8 +324,8 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	CreateCmd.Flags().StringVarP(&dirPath, "dirPath", "d", "./", "directory to .py files")
-	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv")
-	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories; each seperated by comma")
+	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv (virtual env)")
+	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories (each seperated by comma)")
 	CreateCmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
 	CreateCmd.Flags().BoolVarP(&print, "print", "p", false, "print requirements.txt to terminal")
 }
