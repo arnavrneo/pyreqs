@@ -16,8 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        # ref: main
-        fetch-depth: '0'
+        ref: main
 
     - name: pyreqs-test
       uses: actions/setup-go@v4
@@ -40,7 +39,7 @@ jobs:
     - name: Build-darwin-arm64
       run: env GOOS="darwin" GOARCH="arm64" go build -o build/pyreqs-macos-arm64 . 
       
-    - name: Build-darwin-arm64
+    - name: Build-darwin-amd64
       run: env GOOS="darwin" GOARCH="amd64" go build -o build/pyreqs-macos-amd64 . 
       
     - name: Build-windows-386
