@@ -6,6 +6,8 @@ name: Go
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - v*
   pull_request:
     branches: [ "main" ]
 
@@ -55,6 +57,7 @@ jobs:
 
   release:
       runs-on: ubuntu-latest
+      if: ${{ github.event_name == 'push' }}
       permissions:
         contents: write
         
