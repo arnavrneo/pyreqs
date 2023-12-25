@@ -16,7 +16,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0
+        # ref: main
+        fetch-depth: '0'
 
     - name: pyreqs-test
       uses: actions/setup-go@v4
