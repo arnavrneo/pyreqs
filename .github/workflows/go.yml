@@ -72,5 +72,6 @@ jobs:
             path: build
         - uses: ncipollo/release-action@v1
           with:
+            skipIfReleaseExists: true
             tag: v1.1
             artifacts: "build/*"
