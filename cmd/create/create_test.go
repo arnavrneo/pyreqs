@@ -8,7 +8,7 @@ import (
 )
 
 func Test_getPaths(t *testing.T) {
-	dirs := "/home/runner/work/pyreqs/pyreqs/ultralytics/"
+	dirs := "/home/runner/work/pyreqs/pyreqs/ultralytics"
 	_, dirList := getPaths(dirs, "")
 
 	for _, j := range dirList {
@@ -30,7 +30,7 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "/home/runner/work/pyreqs/pyreqs/ultralytics/", "./", false)
+	writeRequirements("", "/home/runner/work/pyreqs/pyreqs/ultralytics", "./", false)
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {
