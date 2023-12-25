@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 ARNAV <r.arnav@icloud.com>
 */
 package cmd
 
@@ -13,8 +13,10 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pyreqs",
-	Short: "pyreqs: for creating python dependencies",
-	Long:  `Use this to create requirements.txt file`,
+	Short: "pyreqs: Create python dependency file easily",
+	Long: `Seamlessly generate python dependencies (requirements.txt) file. 
+Call pyreqs with the available commands to see the magic done!
+			`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
@@ -28,6 +30,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

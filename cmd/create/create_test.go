@@ -1,7 +1,6 @@
 package create
 
 import (
-	"fmt"
 	"bufio"
 	"os"
 	"strings"
@@ -10,7 +9,7 @@ import (
 
 func Test_getPaths(t *testing.T) {
 	dirs := "testdata"
-	_, dirList := getPaths(dirs, "testdata/pyTestCodes")
+	_, dirList := getPaths(dirs, "ultralytics/")
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
@@ -18,19 +17,6 @@ func Test_getPaths(t *testing.T) {
 		}
 	}
 }
-
-//func Test_readImports(t *testing.T) {
-//	dirs := "testdata"
-//	pyFiles, dirList := getPaths(dirs)
-//
-//	imports := readImports(pyFiles, dirList)
-//
-//	for i := range imports {
-//		if strings.ContainsAny(i, "\n | \n\n | \n\n\n") { // check for "" or " " gives error; look into
-//			t.Error("The imports have a new-line.")
-//		}
-//	}
-//}
 
 func Test_fetchPyPIServer(t *testing.T) {
 	testImports := []string{"pandas", "numpy", "notapakage"}
@@ -44,7 +30,7 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "testdata", "./", false)
+	writeRequirements("", "ultralytics/", "./", false)
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {
@@ -52,11 +38,17 @@ func Test_writeRequirements(t *testing.T) {
 	}
 	defer reqRead.Close()
 
-	testImports := map[string]bool{"torch": true, "pandas": true, "transformers": true, "tensorflow": true, "PyYAML": true, "ipython": true, "numpy": true}
+	testImports := map[string]bool{"tensorflow": true, "coremltools": true, "clip": true,
+		"pytest": true, "comet-ml": true, "pycocotools": true, "shapely": true, "nncf": true,
+		"thop": true, "onnxsim": true, "onnxruntime": true, "albumentations": true, "ipython": true,
+		"x2paddle": true, "dvclive": true, "opencv-python": true, "matplotlib": true, "wandb": true,
+		"ncnn": true, "setuptools": true, "SciPy": true, "yt-dlp": true, "psutil": true, "super-gradients": true,
+		"torchvision": true, "Pillow": true, "tflite-runtime": true, "tflite-support": true, "seaborn": true,
+		"tqdm": true, "lap": true, "requests": true, "numpy": true, "tritonclient": true, "pandas": true}
+
 	var imports []string
 	scanner := bufio.NewScanner(reqRead)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
 		imports = append(imports, scanner.Text())
 	}
 

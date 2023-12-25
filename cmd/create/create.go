@@ -4,6 +4,7 @@ Copyright © 2023 ARNAV <r.arnav@icloud.com>
 package create
 
 import (
+	"bufio"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -23,10 +24,11 @@ var (
 	venvPath   string
 	ignoreDirs string
 	savePath   string
-	print      bool
+	printReq   bool
 )
 
-var importRegEx = `^(?m)[\s\S]*import\s+(\w+)(\s+as\s+\w+)?\s*$` // m: m is multiline flag
+var importRegEx = `^import\s+([^\s]+)(\s+as\s+([^\s]+))?$`
+var fromImportRegEx = `^from\s+(\w+\.)*(\w+)\s+import\s+.+$`
 var httpClient = &http.Client{Timeout: 1000 * time.Second}
 
 // bundling files
@@ -99,35 +101,64 @@ func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 // return all the imported libraries
 func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 
-	importLinesSet := map[string]struct{}{} // set
-	imports := map[string]struct{}{}
+	importLinesSet := map[string]struct{}{}     // for "import" case
+	fromImportLinesSet := map[string]struct{}{} // for "from import" case
+	imports := map[string]struct{}{}            // final imports
 
 	for _, v := range pyFiles {
 		data, err := os.ReadFile(v)
 		check(err)
-		codesLines := strings.Split(string(data), "\n") // now done a split at \n followed by regex search
-		r, _ := regexp.Compile(importRegEx)
+		codesLines := strings.Split(string(data), "\n")
+
+		importReg, _ := regexp.Compile(importRegEx)
+		fromImportReg, _ := regexp.Compile(fromImportRegEx)
+
+		// CASE: import <name> (as <name>); and
+		// CASE: from <name> import <name> (as <name>)
 		for _, value := range codesLines {
-			importLinesSet[r.FindString(value)] = struct{}{} // maintained a set for imports
+			importLinesSet[strings.TrimSpace(importReg.FindString(strings.TrimSpace(value)))] = struct{}{}
+			fromImportLinesSet[strings.TrimSpace(fromImportReg.FindString(strings.TrimSpace(value)))] = struct{}{}
 		}
 	}
 
-	// search
+	// SEARCH CASE: import <name> (as <name>)
 	for i := range importLinesSet {
-		importLinesArray := strings.Split(i, " ")
-		for idx, j := range importLinesArray {
-			if strings.Contains(j, "import") {
-				if idx-2 >= 0 && strings.Contains(importLinesArray[idx-2], "from") {
-					if strings.Contains(importLinesArray[idx-1], ".") {
-						imports[strings.TrimSpace(strings.Split(importLinesArray[idx-1], ".")[0])] = struct{}{}
-					} else {
-						imports[strings.TrimSpace(importLinesArray[idx-1])] = struct{}{}
+		if i != "" {
+			importLinesArray := strings.Split(i, " ")
+			if strings.Contains(i, " as ") {
+				for idx, _ := range importLinesArray {
+					if importLinesArray[idx] == "as" { // sep for "as" because it is being included if not done a sep condition
+						if idx-1 > 0 && strings.Contains(importLinesArray[idx-1], ".") {
+							imports[strings.Split(importLinesArray[idx-1], ".")[0]] = struct{}{}
+						} else if idx-1 > 0 {
+							imports[importLinesArray[idx-1]] = struct{}{}
+						}
 					}
-				} else {
-					if strings.Contains(importLinesArray[idx+1], ".") {
-						imports[strings.TrimSpace(strings.Split(importLinesArray[idx+1], ".")[0])] = struct{}{}
-					} else {
-						imports[strings.TrimSpace(importLinesArray[idx+1])] = struct{}{}
+				}
+			} else {
+				for idx, _ := range importLinesArray {
+					if importLinesArray[idx] == "import" {
+						if idx+1 < len(importLinesArray) && strings.Contains(importLinesArray[idx+1], ".") {
+							imports[strings.Split(importLinesArray[idx+1], ".")[0]] = struct{}{}
+						} else if idx+1 < len(importLinesArray) {
+							imports[importLinesArray[idx+1]] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// SEARCH CASE: from <name> import <name> (as <name>)
+	for i := range fromImportLinesSet {
+		if i != "" {
+			fromImportLinesArray := strings.Split(i, " ")
+			for idx, _ := range fromImportLinesArray {
+				if fromImportLinesArray[idx] == "from" {
+					if idx+1 < len(fromImportLinesArray) && strings.Contains(fromImportLinesArray[idx+1], ".") {
+						imports[strings.Split(fromImportLinesArray[idx+1], ".")[0]] = struct{}{}
+					} else if idx+1 < len(fromImportLinesArray) {
+						imports[fromImportLinesArray[idx+1]] = struct{}{}
 					}
 				}
 			}
@@ -144,14 +175,18 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 	}
 
 	// python inbuilt imports
-	predefinedLib, err := stdlib.ReadFile("stdlib")
+	predefinedLib, err := stdlib.Open("stdlib")
 	check(err)
-	inbuiltImports := strings.Split(string(predefinedLib), " ")
+	scanner := bufio.NewScanner(predefinedLib)
+	inbuiltImportsSet := make(map[string]bool)
+
+	for scanner.Scan() {
+		inbuiltImportsSet[scanner.Text()] = true
+	}
+
 	for j := range imports {
-		for _, k := range inbuiltImports {
-			if j == k {
-				delete(imports, k)
-			}
+		if inbuiltImportsSet[j] {
+			delete(imports, j)
 		}
 	}
 	return imports
@@ -162,7 +197,7 @@ func getLocalPackages(venvDir string) []string {
 	var distPackages []string
 
 	if venvDir == " " { // if not specified, then search for venv in current dir
-		cwdDir, err := os.Getwd()
+		cwdDir, err := os.Getwd() // will be the current dir of the build file
 		check(err)
 		venvDir = cwdDir
 	}
@@ -193,9 +228,9 @@ func fetchPyPIServer(imp []string) map[string]string {
 	var info Infos
 	pypiSet := make(map[string]string)
 
-	mappings, err := mappings.ReadFile("mappings.txt")
+	predefinedMappings, err := mappings.ReadFile("mappings.txt")
 	check(err)
-	mappingsImports := strings.Split(string(mappings), "\n")
+	mappingsImports := strings.Split(string(predefinedMappings), "\n")
 	mappingImportsMap := make(map[string]bool)
 
 	for _, value := range mappingsImports {
@@ -215,6 +250,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 		} else {
 			name = j
 		}
+		//fmt.Println(name)
 		resp, err := httpClient.Get("https://pypi.org/pypi/" + name + "/json")
 		check(err)
 		defer resp.Body.Close()
@@ -305,10 +341,10 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 // CreateCmd represents the create command
 var CreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "creates a requirements.txt file",
-	Long:  `LONG DESC`,
+	Short: "Generates a requirements.txt file",
+	Long:  `Generates a requirements.txt file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		writeRequirements(venvPath, dirPath, savePath, print)
+		writeRequirements(venvPath, dirPath, savePath, printReq)
 	},
 }
 
@@ -324,8 +360,8 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	CreateCmd.Flags().StringVarP(&dirPath, "dirPath", "d", "./", "directory to .py files")
-	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv")
-	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories; each seperated by comma")
+	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv (virtual env)")
+	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories (each seperated by comma)")
 	CreateCmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
-	CreateCmd.Flags().BoolVarP(&print, "print", "p", false, "print requirements.txt to terminal")
+	CreateCmd.Flags().BoolVarP(&printReq, "print", "p", false, "print requirements.txt to terminal")
 }
