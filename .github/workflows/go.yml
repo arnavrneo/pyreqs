@@ -25,9 +25,11 @@ jobs:
 
     - name: Dependencies
       run: go get .
-      
+
     - name: Test
-      run: go test -v ./...
+      run: |
+            git clone https://github.com/ultralytics/ultralytics.git
+            go test -v ./...
 
 # Cross-platform builds
     - name: Build-linux-arm64
