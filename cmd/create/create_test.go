@@ -8,7 +8,7 @@ import (
 )
 
 func Test_getPaths(t *testing.T) {
-	dirs := "ultralytics"
+	dirs := "ultralytics/"
 	_, dirList := getPaths(dirs, "")
 
 	for _, j := range dirList {
