@@ -8,8 +8,8 @@ import (
 )
 
 func Test_getPaths(t *testing.T) {
-	dirs := "testdata"
-	_, dirList := getPaths(dirs, "ultralytics/")
+	dirs := "ultralytics"
+	_, dirList := getPaths(dirs, "")
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
