@@ -29,6 +29,7 @@ jobs:
     - name: Test
       run: |
             git clone https://github.com/ultralytics/ultralytics.git
+            ls -la
             go test -v ./...
 
 # Cross-platform builds
