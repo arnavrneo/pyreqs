@@ -9,7 +9,7 @@ import (
 
 func Test_getPaths(t *testing.T) {
 	dirs := "testdata"
-	_, dirList := getPaths(dirs, "/home/neo/ultralytics/")
+	_, dirList := getPaths(dirs, "ultralytics/")
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
@@ -30,7 +30,7 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "/home/neo/ultralytics/", "./", false)
+	writeRequirements("", "ultralytics/", "./", false)
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {
