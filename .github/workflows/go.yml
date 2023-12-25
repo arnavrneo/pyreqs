@@ -30,6 +30,7 @@ jobs:
       run: |
             git clone https://github.com/ultralytics/ultralytics.git
             ls -la
+            realpath ultralytics/
             go test -v ./...
 
 # Cross-platform builds
