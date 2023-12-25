@@ -1,8 +1,8 @@
 package create
 
 import (
-	"bufio"
-	"os"
+	// "bufio"
+	// "os"
 	"strings"
 	"testing"
 )
