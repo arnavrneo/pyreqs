@@ -1,6 +1,7 @@
 /*
 Copyright © 2023 ARNAV <r.arnav@icloud.com>
 */
+
 package create
 
 import (
@@ -14,17 +15,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"pyreqs/cmd/utils"
 	"regexp"
 	"strings"
 	"time"
 )
 
 var (
-	dirPath    string
-	venvPath   string
-	ignoreDirs string
-	savePath   string
-	printReq   bool
+	savePath string
 )
 
 var importRegEx = `^import\s+([^\s]+)(\s+as\s+([^\s]+))?$`
@@ -40,14 +38,9 @@ var stdlib embed.FS
 var mappings embed.FS
 
 // MAIN
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
 
-// return the path of python files in the dir
-func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
+// GetPaths returns the path of python files in the dir
+func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	var pyFiles []string
 	var fileList []string
 	var dirList []string
@@ -63,7 +56,7 @@ func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 				}
 				return nil
 			})
-			check(walk)
+			utils.Check(walk)
 		}
 	}
 
@@ -77,7 +70,8 @@ func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 			if ignoreDirList != nil {
 				for _, l := range ignoreDirList {
 					if f.Name() == l.Name() {
-						fmt.Println("K: ", l)
+						// TODO: better debug info
+						fmt.Println("Skipped: ", l)
 						return filepath.SkipDir
 					}
 				}
@@ -86,7 +80,7 @@ func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 		fileList = append(fileList, path)
 		return nil
 	})
-	check(walk)
+	utils.Check(walk)
 
 	for _, file := range fileList {
 		if strings.Contains(file, ".py") {
@@ -98,8 +92,8 @@ func getPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	return pyFiles, dirList
 }
 
-// return all the imported libraries
-func readImports(pyFiles []string, dirList []string) map[string]struct{} {
+// ReadImports returns all the imported libraries
+func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 
 	importLinesSet := map[string]struct{}{}     // for "import" case
 	fromImportLinesSet := map[string]struct{}{} // for "from import" case
@@ -107,7 +101,7 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 
 	for _, v := range pyFiles {
 		data, err := os.ReadFile(v)
-		check(err)
+		utils.Check(err)
 		codesLines := strings.Split(string(data), "\n")
 
 		importReg, _ := regexp.Compile(importRegEx)
@@ -126,7 +120,7 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 		if i != "" {
 			importLinesArray := strings.Split(i, " ")
 			if strings.Contains(i, " as ") {
-				for idx, _ := range importLinesArray {
+				for idx := range importLinesArray {
 					if importLinesArray[idx] == "as" { // sep for "as" because it is being included if not done a sep condition
 						if idx-1 > 0 && strings.Contains(importLinesArray[idx-1], ".") {
 							imports[strings.Split(importLinesArray[idx-1], ".")[0]] = struct{}{}
@@ -136,7 +130,7 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 					}
 				}
 			} else {
-				for idx, _ := range importLinesArray {
+				for idx := range importLinesArray {
 					if importLinesArray[idx] == "import" {
 						if idx+1 < len(importLinesArray) && strings.Contains(importLinesArray[idx+1], ".") {
 							imports[strings.Split(importLinesArray[idx+1], ".")[0]] = struct{}{}
@@ -153,7 +147,7 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 	for i := range fromImportLinesSet {
 		if i != "" {
 			fromImportLinesArray := strings.Split(i, " ")
-			for idx, _ := range fromImportLinesArray {
+			for idx := range fromImportLinesArray {
 				if fromImportLinesArray[idx] == "from" {
 					if idx+1 < len(fromImportLinesArray) && strings.Contains(fromImportLinesArray[idx+1], ".") {
 						imports[strings.Split(fromImportLinesArray[idx+1], ".")[0]] = struct{}{}
@@ -176,7 +170,7 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 
 	// python inbuilt imports
 	predefinedLib, err := stdlib.Open("stdlib")
-	check(err)
+	utils.Check(err)
 	scanner := bufio.NewScanner(predefinedLib)
 	inbuiltImportsSet := make(map[string]bool)
 
@@ -192,19 +186,19 @@ func readImports(pyFiles []string, dirList []string) map[string]struct{} {
 	return imports
 }
 
-// return local packages present in .venv dir
-func getLocalPackages(venvDir string) []string {
+// GetLocalPackages returns local packages present in .venv dir
+func GetLocalPackages(venvDir string) []string {
 	var distPackages []string
 
 	if venvDir == " " { // if not specified, then search for venv in current dir
 		cwdDir, err := os.Getwd() // will be the current dir of the build file
-		check(err)
+		utils.Check(err)
 		venvDir = cwdDir
 	}
 	// TODO: try a search for lib64 dir also
 	pattern := filepath.Join(venvDir, "venv/lib/*/*/*.dist-info")
 	matches, err := filepath.Glob(pattern)
-	check(err)
+	utils.Check(err)
 
 	for _, v := range matches {
 		list := strings.Split(v, "/")
@@ -214,8 +208,8 @@ func getLocalPackages(venvDir string) []string {
 	return distPackages
 }
 
-// fetch and return info from pypi package server
-func fetchPyPIServer(imp []string) map[string]string {
+// FetchPyPIServer fetches and returns info from pypi package server
+func FetchPyPIServer(imp []string) map[string]string {
 	type Content struct {
 		Name    string `json:"name"`
 		Version string `json:"version"`
@@ -229,7 +223,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 	pypiSet := make(map[string]string)
 
 	predefinedMappings, err := mappings.ReadFile("mappings.txt")
-	check(err)
+	utils.Check(err)
 	mappingsImports := strings.Split(string(predefinedMappings), "\n")
 	mappingImportsMap := make(map[string]bool)
 
@@ -240,7 +234,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 	for _, j := range imp {
 		// TODO: do http error handling
 		var name string
-		// check for python libraries mapping
+		// utils.Check for python libraries mapping
 		if mappingImportsMap[j] {
 			for _, key := range mappingsImports {
 				if strings.Split(key, ":")[0] == j {
@@ -252,14 +246,20 @@ func fetchPyPIServer(imp []string) map[string]string {
 		}
 		//fmt.Println(name)
 		resp, err := httpClient.Get("https://pypi.org/pypi/" + name + "/json")
-		check(err)
-		defer resp.Body.Close()
+		utils.Check(err)
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				panic(err)
+			}
+		}()
 
 		// reading response struct using ioutil
 		body, err := io.ReadAll(resp.Body)
-		check(err)
+		utils.Check(err)
 
-		json.Unmarshal(body, &info)
+		err = json.Unmarshal(body, &info)
+		utils.Check(err)
 		pypiSet[info.Info.Name] = info.Info.Version
 
 	}
@@ -267,7 +267,7 @@ func fetchPyPIServer(imp []string) map[string]string {
 }
 
 // write to requirements.txt
-func writeRequirements(venvDir string, codesDir string, savePath string, print bool) {
+func writeRequirements(venvDir string, codesDir string, savePath string, print bool, ignoreDirs string) {
 	// type store struct {
 	// 	name string
 	// 	ver string
@@ -278,17 +278,17 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 		fmt.Printf("requirements.txt already exists. It will be overwritten.\n")
 	}
 	file, err := os.Create(filepath.Join(savePath, "requirements.txt"))
-	check(err)
+	utils.Check(err)
 
-	defer func() { // delays the execution until the surrounding function completes
+	defer func() {
 		if err := file.Close(); err != nil {
 			panic(err)
 		}
 	}()
 
-	pyFiles, dirList := getPaths(codesDir, ignoreDirs)
-	imports := readImports(pyFiles, dirList)
-	distPackages := getLocalPackages(venvDir)
+	pyFiles, dirList := GetPaths(codesDir, ignoreDirs)
+	imports := ReadImports(pyFiles, dirList)
+	distPackages := GetLocalPackages(venvDir)
 
 	localSet := make(map[string]string)
 
@@ -316,7 +316,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 			pypiStore = append(pypiStore, i)
 		}
 	}
-	pypiSet := fetchPyPIServer(pypiStore)
+	pypiSet := FetchPyPIServer(pypiStore)
 
 	importsInfo := make(map[string]string)
 	maps.Copy(importsInfo, localSet)
@@ -338,13 +338,23 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 
 }
 
-// CreateCmd represents the create command
-var CreateCmd = &cobra.Command{
+// Cmd represents the create command
+var Cmd = &cobra.Command{
 	Use:   "create",
 	Short: "Generates a requirements.txt file",
 	Long:  `Generates a requirements.txt file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		writeRequirements(venvPath, dirPath, savePath, printReq)
+
+		dirPath, err1 := cmd.Flags().GetString("dirPath")
+		utils.Check(err1)
+		venvPath, err2 := cmd.Flags().GetString("venvPath")
+		utils.Check(err2)
+		ignoreDirs, err3 := cmd.Flags().GetString("ignore")
+		utils.Check(err3)
+		printReq, err4 := cmd.Flags().GetBool("print")
+		utils.Check(err4)
+
+		writeRequirements(venvPath, dirPath, savePath, printReq, ignoreDirs)
 	},
 }
 
@@ -359,9 +369,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	CreateCmd.Flags().StringVarP(&dirPath, "dirPath", "d", "./", "directory to .py files")
-	CreateCmd.Flags().StringVarP(&venvPath, "venvPath", "v", " ", "directory to venv (virtual env)")
-	CreateCmd.Flags().StringVarP(&ignoreDirs, "ignore", "i", " ", "ignore specific directories (each seperated by comma)")
-	CreateCmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
-	CreateCmd.Flags().BoolVarP(&printReq, "print", "p", false, "print requirements.txt to terminal")
+	Cmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
 }

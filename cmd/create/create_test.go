@@ -1,8 +1,6 @@
 package create
 
 import (
-	// "bufio"
-	// "os"
 	"strings"
 	"testing"
 )
@@ -18,9 +16,10 @@ import (
 // 	}
 // }
 
+
 func Test_fetchPyPIServer(t *testing.T) {
 	testImports := []string{"pandas", "numpy", "notapakage"}
-	fetchedImports := fetchPyPIServer(testImports)
+	fetchedImports := FetchPyPIServer(testImports)
 
 	for i := range fetchedImports {
 		if strings.Contains(i, "notapakage") {
