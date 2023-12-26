@@ -9,7 +9,7 @@ import (
 
 func Test_getPaths(t *testing.T) {
 	dirs := "testdata"
-	_, dirList := getPaths(dirs, "ultralytics/")
+	_, dirList := GetPaths(dirs, "/home/neo/ultralytics/")
 
 	for _, j := range dirList {
 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
@@ -20,7 +20,7 @@ func Test_getPaths(t *testing.T) {
 
 func Test_fetchPyPIServer(t *testing.T) {
 	testImports := []string{"pandas", "numpy", "notapakage"}
-	fetchedImports := fetchPyPIServer(testImports)
+	fetchedImports := FetchPyPIServer(testImports)
 
 	for i := range fetchedImports {
 		if strings.Contains(i, "notapakage") {
@@ -30,13 +30,18 @@ func Test_fetchPyPIServer(t *testing.T) {
 }
 
 func Test_writeRequirements(t *testing.T) {
-	writeRequirements("", "ultralytics/", "./", false)
+	writeRequirements("", "/home/neo/ultralytics/", "./", false)
 
 	reqRead, err := os.Open("requirements.txt")
 	if err != nil {
 		panic(err)
 	}
-	defer reqRead.Close()
+
+	defer func() {
+		if err := reqRead.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	testImports := map[string]bool{"tensorflow": true, "coremltools": true, "clip": true,
 		"pytest": true, "comet-ml": true, "pycocotools": true, "shapely": true, "nncf": true,
