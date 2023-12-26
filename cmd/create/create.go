@@ -23,6 +23,8 @@ import (
 
 var (
 	savePath string
+	debug    bool
+	pinType  string
 )
 
 var importRegEx = `^import\s+([^\s]+)(\s+as\s+([^\s]+))?$`
@@ -38,6 +40,18 @@ var stdlib embed.FS
 var mappings embed.FS
 
 // MAIN
+
+func getPinType(pinType string) string {
+	if pinType == "gt" {
+		return ">="
+	} else if pinType == "compat" {
+		return "~="
+	} else if pinType == "none" {
+		return ""
+	} else {
+		return "=="
+	}
+}
 
 // GetPaths returns the path of python files in the dir
 func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
@@ -70,8 +84,9 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 			if ignoreDirList != nil {
 				for _, l := range ignoreDirList {
 					if f.Name() == l.Name() {
-						// TODO: better debug info
-						fmt.Println("Skipped: ", l)
+						if debug {
+							fmt.Println("Skipped Directory: ", l)
+						}
 						return filepath.SkipDir
 					}
 				}
@@ -89,6 +104,11 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 			dirList = append(dirList, file)
 		}
 	}
+
+	if debug {
+		fmt.Print("Found ", len(pyFiles), " .py files.\n")
+	}
+
 	return pyFiles, dirList
 }
 
@@ -159,16 +179,22 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 		}
 	}
 
+	totalImportCount := len(imports)
+	dirImports := make(map[string]bool)
 	// ignore all the directory imports
 	for k := range imports {
 		for _, l := range dirList {
-			if strings.Contains(l, k) {
-				delete(imports, k)
+			for _, m := range strings.Split(l, "/") {
+				if k == m {
+					dirImports[k] = true
+					delete(imports, k)
+				}
 			}
 		}
 	}
 
 	// python inbuilt imports
+	inbuiltImportCount := 0
 	predefinedLib, err := stdlib.Open("stdlib")
 	utils.Check(err)
 	scanner := bufio.NewScanner(predefinedLib)
@@ -180,9 +206,18 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 
 	for j := range imports {
 		if inbuiltImportsSet[j] {
+			inbuiltImportCount += 1
 			delete(imports, j)
 		}
 	}
+
+	if debug {
+		fmt.Println("Total Imports: ", totalImportCount)
+		fmt.Println("Total Directory Imports: ", len(dirImports))
+		fmt.Println("Total Python Inbuilt Imports: ", inbuiltImportCount)
+		fmt.Println("Total User Imports: ", totalImportCount-(len(dirImports)+inbuiltImportCount))
+	}
+
 	return imports
 }
 
@@ -273,10 +308,11 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	// 	ver string
 	// }
 
-	_, err := os.Stat(filepath.Join(savePath, "requirements.txt"))
-	if !os.IsNotExist(err) {
-		fmt.Printf("requirements.txt already exists. It will be overwritten.\n")
-	}
+	// TODO: prompt for req.txt being overwritten
+	//_, err := os.Stat(filepath.Join(savePath, "requirements.txt"))
+	//if !os.IsNotExist(err) {
+	//	fmt.Printf("requirements.txt already exists. It will be overwritten.\n")
+	//}
 	file, err := os.Create(filepath.Join(savePath, "requirements.txt"))
 	utils.Check(err)
 
@@ -303,6 +339,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	}
 
 	// imports from pypi server
+	// TODO: can we change o(n2) to something less demanding?
 	var pypiStore []string
 	for i := range imports {
 		cntr := 0
@@ -312,29 +349,47 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 			}
 		}
 		if cntr == 0 {
-			// name, ver := fetchPyPIServer(i)
 			pypiStore = append(pypiStore, i)
 		}
 	}
+	// TODO: do we need the following level of verbosity?
+	//fmt.Println(pypiStore)
 	pypiSet := FetchPyPIServer(pypiStore)
+
+	if debug {
+		fmt.Println("Total Local Imports (from venv): ", len(localSet))
+		fmt.Println("Total PyPI server Imports: ", len(pypiSet))
+	}
 
 	importsInfo := make(map[string]string)
 	maps.Copy(importsInfo, localSet)
 	maps.Copy(importsInfo, pypiSet)
 
+	pintype := getPinType(pinType)
+
 	for i, j := range importsInfo {
 		if i != "" || j != "" {
-			fullImport := i + "==" + j + "\n"
-			if _, err := file.Write([]byte(fullImport)); err != nil {
-				panic(err)
-			}
-			if print {
-				fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+			if pintype != "" {
+				fullImport := i + pintype + j + "\n"
+				if _, err := file.Write([]byte(fullImport)); err != nil {
+					panic(err)
+				}
+				if print {
+					fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+				}
+			} else {
+				fullImport := i + "\n"
+				if _, err := file.Write([]byte(fullImport)); err != nil {
+					panic(err)
+				}
+				if print {
+					fmt.Println(strings.TrimSuffix(fullImport, "\n"))
+				}
 			}
 		}
 	}
 
-	fmt.Println("Created successfully!")
+	fmt.Printf("Created successfully!\nSaved to %s\n", savePath+"requirements.txt")
 
 }
 
@@ -353,6 +408,7 @@ var Cmd = &cobra.Command{
 		utils.Check(err3)
 		printReq, err4 := cmd.Flags().GetBool("print")
 		utils.Check(err4)
+		debug, _ = cmd.Flags().GetBool("debug")
 
 		writeRequirements(venvPath, dirPath, savePath, printReq, ignoreDirs)
 	},
@@ -369,5 +425,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	Cmd.Flags().StringVarP(&pinType, "mode", "m", "", "imports pin-type: ==, >=, ~=")
 	Cmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
 }

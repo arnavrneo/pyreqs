@@ -17,7 +17,7 @@ import (
 
 var reqPath string
 
-func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string, printReq bool) {
+func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string, printReq bool, debug bool) {
 
 	// TODO: better way of showing errors
 	if reqPath == " " {
@@ -61,6 +61,14 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 		importsInfo[j] = true
 	}
 
+	if debug {
+		fmt.Print("Imports from project: => ")
+		for i := range importsInfo {
+			fmt.Print(i, " ")
+		}
+		fmt.Println()
+	}
+
 	// read and write
 	reqFile, err := os.OpenFile(reqPath, os.O_RDWR, 0644)
 	utils.Check(err)
@@ -68,14 +76,23 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	var bs []byte
 	buf := bytes.NewBuffer(bs) // stores all the user imports
 
+	matchedImports := []string{}
+
 	for scanner.Scan() {
 		text := scanner.Text()
 		if importsInfo[strings.Split(text, "==")[0]] {
-			if printReq == true {
-				fmt.Println(text)
+			if debug || printReq {
+				matchedImports = append(matchedImports, strings.Split(text, "==")[0])
 			}
 			_, err = buf.WriteString(scanner.Text() + "\n")
 			utils.Check(err)
+		}
+	}
+
+	if debug {
+		fmt.Print("Imports Matched: => ")
+		for _, i := range matchedImports {
+			fmt.Print(i, " ")
 		}
 	}
 
@@ -85,6 +102,8 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	utils.Check(err)
 	_, err = buf.WriteTo(reqFile)
 	utils.Check(err)
+
+	fmt.Print("\nSuccessfully cleaned requirements.txt!\n")
 }
 
 // Cmd represents the clean command
@@ -99,10 +118,12 @@ var Cmd = &cobra.Command{
 		utils.Check(err)
 		ignoreDirs, err := cmd.Flags().GetString("ignore")
 		utils.Check(err)
+		debug, err := cmd.Flags().GetBool("debug")
+		utils.Check(err)
 		printReq, err := cmd.Flags().GetBool("print")
 		utils.Check(err)
 
-		cleanReq(reqPath, dirPath, venvPath, ignoreDirs, printReq)
+		cleanReq(reqPath, dirPath, venvPath, ignoreDirs, printReq, debug)
 	},
 }
 
