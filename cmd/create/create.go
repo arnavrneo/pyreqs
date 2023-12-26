@@ -41,7 +41,7 @@ var mappings embed.FS
 
 // MAIN
 
-// return the path of python files in the dir
+// GetPaths returns the path of python files in the dir
 func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	var pyFiles []string
 	var fileList []string
@@ -72,6 +72,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 			if ignoreDirList != nil {
 				for _, l := range ignoreDirList {
 					if f.Name() == l.Name() {
+						// TODO: better debug info
 						fmt.Println("Skipped: ", l)
 						return filepath.SkipDir
 					}
@@ -93,7 +94,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	return pyFiles, dirList
 }
 
-// return all the imported libraries
+// ReadImports returns all the imported libraries
 func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 
 	importLinesSet := map[string]struct{}{}     // for "import" case
@@ -121,7 +122,7 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 		if i != "" {
 			importLinesArray := strings.Split(i, " ")
 			if strings.Contains(i, " as ") {
-				for idx, _ := range importLinesArray {
+				for idx := range importLinesArray {
 					if importLinesArray[idx] == "as" { // sep for "as" because it is being included if not done a sep condition
 						if idx-1 > 0 && strings.Contains(importLinesArray[idx-1], ".") {
 							imports[strings.Split(importLinesArray[idx-1], ".")[0]] = struct{}{}
@@ -131,7 +132,7 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 					}
 				}
 			} else {
-				for idx, _ := range importLinesArray {
+				for idx := range importLinesArray {
 					if importLinesArray[idx] == "import" {
 						if idx+1 < len(importLinesArray) && strings.Contains(importLinesArray[idx+1], ".") {
 							imports[strings.Split(importLinesArray[idx+1], ".")[0]] = struct{}{}
@@ -148,7 +149,7 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 	for i := range fromImportLinesSet {
 		if i != "" {
 			fromImportLinesArray := strings.Split(i, " ")
-			for idx, _ := range fromImportLinesArray {
+			for idx := range fromImportLinesArray {
 				if fromImportLinesArray[idx] == "from" {
 					if idx+1 < len(fromImportLinesArray) && strings.Contains(fromImportLinesArray[idx+1], ".") {
 						imports[strings.Split(fromImportLinesArray[idx+1], ".")[0]] = struct{}{}
@@ -187,7 +188,7 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 	return imports
 }
 
-// return local packages present in .venv dir
+// GetLocalPackages returns local packages present in .venv dir
 func GetLocalPackages(venvDir string) []string {
 	var distPackages []string
 
@@ -209,7 +210,7 @@ func GetLocalPackages(venvDir string) []string {
 	return distPackages
 }
 
-// fetch and return info from pypi package server
+// FetchPyPIServer fetches and returns info from pypi package server
 func FetchPyPIServer(imp []string) map[string]string {
 	type Content struct {
 		Name    string `json:"name"`
@@ -248,13 +249,19 @@ func FetchPyPIServer(imp []string) map[string]string {
 		//fmt.Println(name)
 		resp, err := httpClient.Get("https://pypi.org/pypi/" + name + "/json")
 		utils.Check(err)
-		defer resp.Body.Close()
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				panic(err)
+			}
+		}()
 
 		// reading response struct using ioutil
 		body, err := io.ReadAll(resp.Body)
 		utils.Check(err)
 
-		json.Unmarshal(body, &info)
+		err = json.Unmarshal(body, &info)
+		utils.Check(err)
 		pypiSet[info.Info.Name] = info.Info.Version
 
 	}
@@ -275,7 +282,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	file, err := os.Create(filepath.Join(savePath, "requirements.txt"))
 	utils.Check(err)
 
-	defer func() { // delays the execution until the surrounding function completes
+	defer func() {
 		if err := file.Close(); err != nil {
 			panic(err)
 		}
@@ -333,7 +340,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 
 }
 
-// CreateCmd represents the create command
+// Cmd represents the create command
 var Cmd = &cobra.Command{
 	Use:   "create",
 	Short: "Generates a requirements.txt file",

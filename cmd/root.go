@@ -11,12 +11,10 @@ import (
 	"pyreqs/cmd/create"
 )
 
-var DirPath string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "pyreqs",
-	Short: "pyreqs: Create python dependency file easily",
+	Short: "pyreqs: Create python dependencies file easily",
 	Long: `Seamlessly generate python dependencies (requirements.txt) file. 
 Call pyreqs with the available commands to see the magic done!
 			`,
