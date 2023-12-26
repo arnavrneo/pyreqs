@@ -36,7 +36,12 @@ func Test_writeRequirements(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	defer reqRead.Close()
+
+	defer func() {
+		if err := reqRead.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	testImports := map[string]bool{"tensorflow": true, "coremltools": true, "clip": true,
 		"pytest": true, "comet-ml": true, "pycocotools": true, "shapely": true, "nncf": true,
