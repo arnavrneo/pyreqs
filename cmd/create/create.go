@@ -22,9 +22,7 @@ import (
 )
 
 var (
-	ignoreDirs string
-	savePath   string
-	printReq   bool
+	savePath string
 )
 
 var importRegEx = `^import\s+([^\s]+)(\s+as\s+([^\s]+))?$`
@@ -269,7 +267,7 @@ func FetchPyPIServer(imp []string) map[string]string {
 }
 
 // write to requirements.txt
-func writeRequirements(venvDir string, codesDir string, savePath string, print bool) {
+func writeRequirements(venvDir string, codesDir string, savePath string, print bool, ignoreDirs string) {
 	// type store struct {
 	// 	name string
 	// 	ver string
@@ -346,14 +344,17 @@ var Cmd = &cobra.Command{
 	Short: "Generates a requirements.txt file",
 	Long:  `Generates a requirements.txt file.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		dirPath, err1 := cmd.Flags().GetString("dirPath")
-		venvPath, err2 := cmd.Flags().GetString("venvPath")
-		ignoreDirs, _ = cmd.Flags().GetString("ignore")
-
 		utils.Check(err1)
+		venvPath, err2 := cmd.Flags().GetString("venvPath")
 		utils.Check(err2)
+		ignoreDirs, err3 := cmd.Flags().GetString("ignore")
+		utils.Check(err3)
+		printReq, err4 := cmd.Flags().GetBool("print")
+		utils.Check(err4)
 
-		writeRequirements(venvPath, dirPath, savePath, printReq)
+		writeRequirements(venvPath, dirPath, savePath, printReq, ignoreDirs)
 	},
 }
 
@@ -369,5 +370,4 @@ func init() {
 	// is called directly, e.g.:
 	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	Cmd.Flags().StringVarP(&savePath, "savePath", "s", "./", "save path for requirements.txt")
-	Cmd.Flags().BoolVarP(&printReq, "print", "p", false, "print requirements.txt to terminal")
 }
