@@ -1,14 +1,17 @@
 /*
 Copyright © 2023 ARNAV <r.arnav@icloud.com>
 */
+
 package cmd
 
 import (
-	"os"
-	"pyreqs/cmd/create"
-
 	"github.com/spf13/cobra"
+	"os"
+	"pyreqs/cmd/clean"
+	"pyreqs/cmd/create"
 )
+
+var DirPath string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -38,7 +41,8 @@ func Execute() {
 }
 
 func addSubcommandsPalette() {
-	rootCmd.AddCommand(create.CreateCmd)
+	rootCmd.AddCommand(create.Cmd)
+	rootCmd.AddCommand(clean.Cmd)
 }
 
 func init() {
@@ -46,8 +50,9 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.pyreqs.yaml)")
-
+	rootCmd.PersistentFlags().StringP("dirPath", "d", "./", "directory to .py files")
+	rootCmd.PersistentFlags().StringP("venvPath", "v", " ", "directory to venv (virtual env)")
+	rootCmd.PersistentFlags().StringP("ignore", "i", " ", "ignore specific directories (each seperated by comma)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 
