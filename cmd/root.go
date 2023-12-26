@@ -52,6 +52,8 @@ func init() {
 	rootCmd.PersistentFlags().StringP("venvPath", "v", " ", "directory to venv (virtual env)")
 	rootCmd.PersistentFlags().StringP("ignore", "i", " ", "ignore specific directories (each seperated by comma)")
 	rootCmd.PersistentFlags().BoolP("print", "p", false, "print requirements.txt to terminal")
+	rootCmd.PersistentFlags().Bool("debug", false, "print the debug information")
+
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 

@@ -1,21 +1,11 @@
 package create
 
 import (
+	"bufio"
+	"os"
 	"strings"
 	"testing"
 )
-
-// func Test_getPaths(t *testing.T) {
-// 	dirs := "/home/runner/work/pyreqs/pyreqs/ultralytics"
-// 	_, dirList := getPaths(dirs, "")
-
-// 	for _, j := range dirList {
-// 		if strings.Contains(j, "venv") || strings.Contains(j, "env") || strings.Contains(j, "__pycache__") || strings.Contains(j, ".git") || strings.Contains(j, ".tox") {
-// 			t.Error("Directory list has ignored directories.")
-// 		}
-// 	}
-// }
-
 
 func Test_fetchPyPIServer(t *testing.T) {
 	testImports := []string{"pandas", "numpy", "notapakage"}
@@ -28,32 +18,33 @@ func Test_fetchPyPIServer(t *testing.T) {
 	}
 }
 
-// func Test_writeRequirements(t *testing.T) {
-// 	writeRequirements("", "/home/runner/work/pyreqs/pyreqs/ultralytics", "./", false)
+func Test_writeRequirements(t *testing.T) {
+	writeRequirements("", "testdata/", "./", false, " ")
 
-// 	reqRead, err := os.Open("requirements.txt")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer reqRead.Close()
+	reqRead, err := os.Open("requirements.txt")
+	if err != nil {
+		panic(err)
+	}
+	defer reqRead.Close()
 
-// 	testImports := map[string]bool{"tensorflow": true, "coremltools": true, "clip": true,
-// 		"pytest": true, "comet-ml": true, "pycocotools": true, "shapely": true, "nncf": true,
-// 		"thop": true, "onnxsim": true, "onnxruntime": true, "albumentations": true, "ipython": true,
-// 		"x2paddle": true, "dvclive": true, "opencv-python": true, "matplotlib": true, "wandb": true,
-// 		"ncnn": true, "setuptools": true, "SciPy": true, "yt-dlp": true, "psutil": true, "super-gradients": true,
-// 		"torchvision": true, "Pillow": true, "tflite-runtime": true, "tflite-support": true, "seaborn": true,
-// 		"tqdm": true, "lap": true, "requests": true, "numpy": true, "tritonclient": true, "pandas": true}
+	testImports := map[string]bool{
+		"torch":        true,
+		"ipython":      true,
+		"tensorflow":   true,
+		"pandas":       true,
+		"PyYAML":       true,
+		"transformers": true,
+		"numpy":        true}
 
-// 	var imports []string
-// 	scanner := bufio.NewScanner(reqRead)
-// 	for scanner.Scan() {
-// 		imports = append(imports, scanner.Text())
-// 	}
+	var imports []string
+	scanner := bufio.NewScanner(reqRead)
+	for scanner.Scan() {
+		imports = append(imports, scanner.Text())
+	}
 
-// 	for _, j := range imports {
-// 		if !testImports[strings.Split(j, "==")[0]] {
-// 			t.Error("Missing or extra imports found.")
-// 		}
-// 	}
-// }
+	for _, j := range imports {
+		if !testImports[strings.Split(j, "==")[0]] {
+			t.Error("Missing or extra imports found.")
+		}
+	}
+}
