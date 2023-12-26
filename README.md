@@ -66,3 +66,8 @@ pyreqs clean -r <path-to-requirements.txt> -d <path-to-project>
 ## Contributing
 
 If anything feels off, or if you feel that some functionality is missing, go and hit-up an issue!
+
+## TODO
+- [ ] Print debug information flag
+- [ ] Mode versioning for imports (>, ==, ~=. no pin)
+- [ ] Visual Changes
