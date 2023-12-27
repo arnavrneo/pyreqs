@@ -2,25 +2,38 @@
 
 `pyreqs` is a command line tool for auto-generating python dependencies file (requirements.txt) for your project.
 
-![](/assets/main-win-crop.png)
+![](https://i.imgur.com/FaYjTro.png)
 
-## Documentation
+| Create Command | Clean Command |
+| --- | --- |
+| ![](https://i.imgur.com/73bduN1.png) | ![](https://i.imgur.com/FV6kyLq.png) |
 
-#### Create command
-![](/assets/create-cmd-crop.png)
-
-#### Clean command
-
-![](/assets/clean-cmd-crop.png)
 
 ## Installation
 
-### Linux & MacOS
+### Linux and MacOS
 
-- Download the latest compatible binary from the releases and add its path to the environment variable.
+- Download the latest compatible binary from the releases;
+- Untar it;
+- Run by `./pyreqs`.
 
+> [!NOTE]
+> Linux and MacOS users need to give read-write permission to `pyreqs`.
+> 
+> For that, do `chmod 755 pyreqs` before running.
+
+
+### Windows
+
+- Download the latest compatible window release;
+- Unzip it;
+- Run `pyreqs.exe` from the `cmd`.
+
+
+> [!TIP]
+> For running `pyreqs` anywhere from the `terminal` or `cmd`, add `pyreqs` path to the system's path variables.
 
 ## Contributing
 
-If anything feels off, or if you feel that some functionality is missing, go and hit-up an issue!
+If anything feels off, or if you feel that some functionality is missing, go and hit-up an issue! 🌟
 
