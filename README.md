@@ -6,33 +6,12 @@
 
 ## Documentation
 
-#### Creating the requirements.txt
+#### Create command
+![](/assets/create-cmd-crop.png)
 
-- Searches for all python files in the current working directory
-```bash
-pyreqs create
-```
+#### Clean command
 
-- Searches for python files in specified directory
-```bash
-pyreqs create -d <path-to-your-project>
-```
-
-- Searches for python files and gets packages info from `venv` directory
-```bash
-pyreqs create -d <path-to-your-project> -v <path-to-venv-folder>
-```
-
-- Search for python files excluding specific directories (multiple dirs are seperated by comma)
-```bash
-pyreqs create -d <path-to-your-project> -i <dir1-to-ignore>,<dir2-to-ignore>
-```
-
-#### Cleaning the requirements.txt
-
-```bash
-pyreqs clean -r <path-to-requirements.txt> -d <path-to-project>
-```
+![](/assets/clean-cmd-crop.png)
 
 ## Installation
 
