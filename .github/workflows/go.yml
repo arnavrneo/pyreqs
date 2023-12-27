@@ -50,15 +50,15 @@ jobs:
       run: |
             goreleaser init
             goreleaser release --snapshot
-            tar -czvf pyreqs_linux_arm64.tar.gz pyreqs_linux_arm64/*
-            tar -czvf pyreqs_linux_amd64.tar.gz pyreqs_linux_amd64_v1/*
-            tar -czvf pyreqs_linux_386.tar.gz pyreqs_linux_386/*
-            tar -czvf pyreqs_darwin_amd64.tar.gz pyreqs_darwin_amd64_v1/*
-            tar -czvf pyreqs_darwin_arm64.tar.gz pyreqs_darwin_arm64/*
-            zip -r pyreqs_windows_arm64.zip pyreqs_windows_arm64/*
-            zip -r pyreqs_windows_amd64.zip pyreqs_windows_amd64_v1/*
-            zip -r pyreqs_windows_386.zip pyreqs_windows_386/*
-            rm -rf pyreqs_0.0.0-*/
+            tar -czvf pyreqs_linux_arm64.tar.gz dist/pyreqs_linux_arm64/*
+            tar -czvf pyreqs_linux_amd64.tar.gz dist/pyreqs_linux_amd64_v1/*
+            tar -czvf pyreqs_linux_386.tar.gz dist/pyreqs_linux_386/*
+            tar -czvf pyreqs_darwin_amd64.tar.gz dist/pyreqs_darwin_amd64_v1/*
+            tar -czvf pyreqs_darwin_arm64.tar.gz dist/pyreqs_darwin_arm64/*
+            zip -r pyreqs_windows_arm64.zip dist/pyreqs_windows_arm64/*
+            zip -r pyreqs_windows_amd64.zip dist/pyreqs_windows_amd64_v1/*
+            zip -r pyreqs_windows_386.zip dist/pyreqs_windows_386/*
+            rm -rf dist/pyreqs_0.0.0-*/
             
       
 # Cross-platform builds
