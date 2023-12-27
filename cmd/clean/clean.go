@@ -18,8 +18,7 @@ import (
 
 var reqPath string
 
-var blue = color.New(color.FgBlue)
-var bGreen = color.New(color.FgGreen)
+var cyan = color.New(color.FgCyan)
 
 func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string, printReq bool, debug bool) {
 
@@ -66,10 +65,9 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	}
 
 	if debug {
-		blue.Print(("Imports from project: => "))
+		cyan.Print(("Imports from project: => "))
 		for i := range importsInfo {
-			bGreen.Print(i)
-			fmt.Print(" ")
+			fmt.Print(i, " ")
 		}
 		fmt.Println()
 	}
@@ -95,10 +93,9 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	}
 
 	if debug {
-		blue.Print("Imports Matched: => ")
+		cyan.Print("Imports Matched: => ")
 		for _, i := range matchedImports {
-			bGreen.Print(i)
-			fmt.Print(" ")
+			fmt.Print(i, " ")
 		}
 	}
 
