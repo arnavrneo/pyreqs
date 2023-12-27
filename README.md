@@ -32,6 +32,10 @@
 
 > [!TIP]
 > For running `pyreqs` anywhere from the `terminal` or `cmd`, add `pyreqs` path to the system's path variables.
+> ### Linux
+> - Copy `pyreqs` to `/usr/local/bin`: `cp ~/pyreqs /usr/local/bin/`.
+> ### MacOS
+> - `cp ~/pyreqs /etc/paths/`.
 
 ## Contributing
 
