@@ -2,29 +2,7 @@
 
 `pyreqs` is a command line tool for auto-generating python dependencies file (requirements.txt) for your project.
 
-```
-Seamlessly generate python dependencies (requirements.txt) file. 
-Call pyreqs with the available commands to see the magic done!
-
-Usage:
-  pyreqs [flags]
-  pyreqs [command]
-
-Available Commands:
-  clean       Cleans up your requirements.txt
-  create      Generates a requirements.txt file
-  help        Help about any command
-
-Flags:
-  -d, --dirPath string    directory to .py files (default "./")
-  -h, --help              help for pyreqs
-  -i, --ignore string     ignore specific directories (each seperated by comma) (default " ")
-  -p, --print             print requirements.txt to terminal
-  -v, --venvPath string   directory to venv (virtual env) (default " ")
-
-Use "pyreqs [command] --help" for more information about a command.
-
-```
+![](/assets/main-win-crop.png)
 
 ## Documentation
 
