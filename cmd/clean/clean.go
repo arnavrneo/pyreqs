@@ -112,7 +112,7 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 // Cmd represents the clean command
 var Cmd = &cobra.Command{
 	Use:   "clean",
-	Short: "Cleans up your requirements.txt",
+	Short: "Cleans up your requirements.txt file",
 	Long:  `It cleans up your requirements.txt by removing imports that are not imported in your project.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		dirPath, err := cmd.Flags().GetString("dirPath")
@@ -141,5 +141,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// CleanCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	Cmd.Flags().StringVarP(&reqPath, "reqPath", "r", " ", "path to requirements.txt")
+	Cmd.Flags().StringVarP(&reqPath, "reqPath", "r", " ", "path to requirements.txt file")
 }
