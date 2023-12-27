@@ -87,7 +87,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 				for _, l := range ignoreDirList {
 					if f.Name() == l.Name() {
 						if debug {
-							fmt.Println(color.BlueString("Skipping Directory: "), l.Name())
+							fmt.Println(color.CyanString("Skipping Directory: "), l.Name())
 						}
 						return filepath.SkipDir
 					}
@@ -108,7 +108,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	}
 
 	if debug {
-		fmt.Println(color.BlueString("Found ") + color.GreenString(strconv.Itoa(len(pyFiles))) + color.BlueString(" .py files."))
+		fmt.Println(color.CyanString("Found ") + strconv.Itoa(len(pyFiles)) + color.CyanString(" .py files."))
 	}
 
 	return pyFiles, dirList
@@ -214,10 +214,10 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 	}
 
 	if debug {
-		fmt.Println(color.BlueString("Total Imports: ") + color.GreenString(strconv.Itoa(totalImportCount)))
-		fmt.Println(color.BlueString("Total Directory Imports: ") + color.GreenString(strconv.Itoa(len(dirImports))))
-		fmt.Println(color.BlueString("Total Python Inbuilt Imports: ") + color.GreenString(strconv.Itoa(inbuiltImportCount)))
-		fmt.Println(color.BlueString("Total User Imports: ") + color.GreenString(strconv.Itoa(totalImportCount-(len(dirImports)+inbuiltImportCount))))
+		fmt.Println(color.CyanString("Total Imports: ") + strconv.Itoa(totalImportCount))
+		fmt.Println(color.CyanString("Total Directory Imports: ") + strconv.Itoa(len(dirImports)))
+		fmt.Println(color.CyanString("Total Python Inbuilt Imports: ") + strconv.Itoa(inbuiltImportCount))
+		fmt.Println(color.CyanString("Total User Imports: ") + strconv.Itoa(totalImportCount-(len(dirImports)+inbuiltImportCount)))
 	}
 
 	return imports
@@ -359,8 +359,8 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	pypiSet := FetchPyPIServer(pypiStore)
 
 	if debug {
-		fmt.Println(color.BlueString("Total Local Imports (from venv): ") + color.GreenString(strconv.Itoa(len(localSet))))
-		fmt.Println(color.BlueString("Total PyPI server Imports: ") + color.GreenString(strconv.Itoa(len(pypiSet))))
+		fmt.Println(color.CyanString("Total Local Imports (from venv): ") + strconv.Itoa(len(localSet)))
+		fmt.Println(color.CyanString("Total PyPI server Imports: ") + strconv.Itoa(len(pypiSet)))
 	}
 
 	importsInfo := make(map[string]string)
