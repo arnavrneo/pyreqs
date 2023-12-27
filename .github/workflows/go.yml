@@ -8,10 +8,12 @@ on:
     branches: [ "main" ]
     paths-ignore:
       - '**/**.md'
+      - 'assets/'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - '**/**.md'
+      - 'assets/'
 
 jobs:
 
