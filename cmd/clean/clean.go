@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
 	"pyreqs/cmd/create"
@@ -17,11 +18,14 @@ import (
 
 var reqPath string
 
+var blue = color.New(color.FgBlue)
+var bGreen = color.New(color.FgGreen)
+
 func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string, printReq bool, debug bool) {
 
 	// TODO: better way of showing errors
 	if reqPath == " " {
-		panic("Path to requirements.txt not passed!")
+		panic(color.RedString("Path to requirements.txt not passed!"))
 	}
 
 	pyFiles, dirList := create.GetPaths(dirPath, ignoreDirs)
@@ -62,9 +66,10 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	}
 
 	if debug {
-		fmt.Print("Imports from project: => ")
+		blue.Print(("Imports from project: => "))
 		for i := range importsInfo {
-			fmt.Print(i, " ")
+			bGreen.Print(i)
+			fmt.Print(" ")
 		}
 		fmt.Println()
 	}
@@ -90,9 +95,10 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	}
 
 	if debug {
-		fmt.Print("Imports Matched: => ")
+		blue.Print("Imports Matched: => ")
 		for _, i := range matchedImports {
-			fmt.Print(i, " ")
+			bGreen.Print(i)
+			fmt.Print(" ")
 		}
 	}
 
@@ -103,7 +109,7 @@ func cleanReq(reqPath string, dirPath string, venvPath string, ignoreDirs string
 	_, err = buf.WriteTo(reqFile)
 	utils.Check(err)
 
-	fmt.Print("\nSuccessfully cleaned requirements.txt!\n")
+	fmt.Print("\nSuccessfully cleaned " + color.GreenString("requirements.txt!\n"))
 }
 
 // Cmd represents the clean command

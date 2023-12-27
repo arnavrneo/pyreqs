@@ -9,6 +9,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"io"
 	"maps"
@@ -17,6 +18,7 @@ import (
 	"path/filepath"
 	"pyreqs/cmd/utils"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -85,7 +87,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 				for _, l := range ignoreDirList {
 					if f.Name() == l.Name() {
 						if debug {
-							fmt.Println("Skipped Directory: ", l)
+							fmt.Println(color.BlueString("Skipping Directory: "), l.Name())
 						}
 						return filepath.SkipDir
 					}
@@ -106,7 +108,7 @@ func GetPaths(dirs string, ignoreDirs string) ([]string, []string) {
 	}
 
 	if debug {
-		fmt.Print("Found ", len(pyFiles), " .py files.\n")
+		fmt.Println(color.BlueString("Found ") + color.GreenString(strconv.Itoa(len(pyFiles))) + color.BlueString(" .py files."))
 	}
 
 	return pyFiles, dirList
@@ -212,10 +214,10 @@ func ReadImports(pyFiles []string, dirList []string) map[string]struct{} {
 	}
 
 	if debug {
-		fmt.Println("Total Imports: ", totalImportCount)
-		fmt.Println("Total Directory Imports: ", len(dirImports))
-		fmt.Println("Total Python Inbuilt Imports: ", inbuiltImportCount)
-		fmt.Println("Total User Imports: ", totalImportCount-(len(dirImports)+inbuiltImportCount))
+		fmt.Println(color.BlueString("Total Imports: ") + color.GreenString(strconv.Itoa(totalImportCount)))
+		fmt.Println(color.BlueString("Total Directory Imports: ") + color.GreenString(strconv.Itoa(len(dirImports))))
+		fmt.Println(color.BlueString("Total Python Inbuilt Imports: ") + color.GreenString(strconv.Itoa(inbuiltImportCount)))
+		fmt.Println(color.BlueString("Total User Imports: ") + color.GreenString(strconv.Itoa(totalImportCount-(len(dirImports)+inbuiltImportCount))))
 	}
 
 	return imports
@@ -357,8 +359,8 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 	pypiSet := FetchPyPIServer(pypiStore)
 
 	if debug {
-		fmt.Println("Total Local Imports (from venv): ", len(localSet))
-		fmt.Println("Total PyPI server Imports: ", len(pypiSet))
+		fmt.Println(color.BlueString("Total Local Imports (from venv): ") + color.GreenString(strconv.Itoa(len(localSet))))
+		fmt.Println(color.BlueString("Total PyPI server Imports: ") + color.GreenString(strconv.Itoa(len(pypiSet))))
 	}
 
 	importsInfo := make(map[string]string)
@@ -389,8 +391,7 @@ func writeRequirements(venvDir string, codesDir string, savePath string, print b
 		}
 	}
 
-	fmt.Printf("Created successfully!\nSaved to %s\n", savePath+"requirements.txt")
-
+	fmt.Printf("Created successfully!\nSaved to %s\n", color.GreenString(savePath+"requirements.txt"))
 }
 
 // Cmd represents the create command
