@@ -78,6 +78,6 @@ jobs:
             path: build
         - uses: ncipollo/release-action@v1
           with:
-            skipIfReleaseExists: true
+            allowUpdates: true
             tag: v1.2.2
             artifacts: "build/*"
