@@ -27,7 +27,7 @@
 
 - Download the latest compatible window release;
 - Unzip it;
-- Open `cmd` in the downloads directory and run `pyreqs.exe`.
+- Open `cmd` in the directory where the `pyreqs.exe` is present and run `pyreqs.exe`.
 
 
 > [!TIP]
