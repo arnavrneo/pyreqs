@@ -13,7 +13,16 @@
 
 ### Linux and MacOS
 
-- Download the latest compatible binary from the releases;
+- Download the latest compatible binary from the releases or from below:
+ 
+| Platform | Release |
+| ------------- | ------------- |
+| Linux-x64  | [Link](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Linux_x86_64.tar.gz)  |
+| Linux-arm64  | [Link](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Linux_arm64.tar.gz)  |
+| Linux-i386  | [Link](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Linux_i386.tar.gz)  |
+| MacOS-x64  | [Link](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Darwin_x86_64.tar.gz)  |
+| MacOS-arm64  | [Link](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Darwin_arm64.tar.gz)  |
+
 - Untar it;
 - Run by `./pyreqs`.
 
