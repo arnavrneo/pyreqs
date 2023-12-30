@@ -25,9 +25,9 @@
 
 ### Windows
 
-- Download the latest compatible window release;
+- Download the latest compatible window release: [windows-x64](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Windows_x86_64.zip), [windows-i386](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Windows_i386.zip), [windows-arm64](https://github.com/arnavrneo/pyreqs/releases/download/v1.2.2/pyreqs_Windows_arm64.zip);
 - Unzip it;
-- Open `cmd` in the directory where the `pyreqs.exe` is present and run `pyreqs.exe`.
+- Open `cmd` in the directory where the `pyreqs.exe` is downloaded and run `pyreqs.exe` from the `cmd`.
 
 
 > [!TIP]
