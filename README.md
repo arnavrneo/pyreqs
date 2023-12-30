@@ -27,7 +27,7 @@
 
 - Download the latest compatible window release;
 - Unzip it;
-- Run `pyreqs.exe` from the `cmd`.
+- Open `cmd` in the downloads directory and run `pyreqs.exe`.
 
 
 > [!TIP]
@@ -36,6 +36,8 @@
 > - Copy `pyreqs` to `/usr/local/bin`: `cp ~/pyreqs /usr/local/bin/`.
 > ### MacOS
 > - `cp ~/pyreqs /etc/paths/`.
+> ### Windows
+> - Add `pyreqs.exe` to the set of environment variables.
 
 ## Contributing
 
